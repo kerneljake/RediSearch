@@ -28,6 +28,7 @@
 #include "numeric_index.h"
 #include "redisearch_api.h"
 #include "alias.h"
+#include "module.h"
 
 pthread_rwlock_t RWLock = PTHREAD_RWLOCK_INITIALIZER;
 
@@ -234,7 +235,6 @@ int GetDocumentsCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc)
     return RedisModule_WrongArity(ctx);
   }
 
-  RedisModule_AutoMemory(ctx);
   RedisSearchCtx *sctx = NewSearchCtx(ctx, argv[1], true);
   if (sctx == NULL) {
     return RedisModule_ReplyWithError(ctx, "Unknown Index name");
@@ -250,8 +250,9 @@ int GetDocumentsCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int argc)
       continue;
     }
 
-    Document doc;
-    if (Redis_LoadDocument(sctx, argv[i], &doc) == REDISMODULE_ERR) {
+    Document doc = {0};
+    Document_Init(&doc, argv[i], 0, NULL);
+    if (Document_LoadAllFields(&doc, ctx) == REDISMODULE_ERR) {
       RedisModule_ReplyWithNull(ctx);
     } else {
       Document_ReplyFields(ctx, &doc);
@@ -276,16 +277,16 @@ int GetSingleDocumentCommand(RedisModuleCtx *ctx, RedisModuleString **argv, int 
     return RedisModule_WrongArity(ctx);
   }
 
-  RedisModule_AutoMemory(ctx);
   RedisSearchCtx *sctx = NewSearchCtx(ctx, argv[1], true);
   if (sctx == NULL) {
     return RedisModule_ReplyWithError(ctx, "Unknown Index name");
   }
 
-  Document doc;
+  Document doc = {0};
+  Document_Init(&doc, argv[2], 0, NULL);
 
   if (DocTable_GetIdR(&sctx->spec->docs, argv[2]) == 0 ||
-      Redis_LoadDocument(sctx, argv[2], &doc) == REDISMODULE_ERR) {
+      Document_LoadAllFields(&doc, ctx) == REDISMODULE_ERR) {
     RedisModule_ReplyWithNull(ctx);
   } else {
     Document_ReplyFields(ctx, &doc);
@@ -1085,4 +1086,5 @@ void __attribute__((destructor)) RediSearch_CleanupModule(void) {
   mempool_free_global();
   ConcurrentSearch_ThreadPoolDestroy();
   IndexAlias_DestroyGlobal();
+  RedisModule_FreeThreadSafeContext(RSDummyContext);
 }

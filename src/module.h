@@ -11,6 +11,9 @@ int RediSearch_InitModuleInternal(RedisModuleCtx *ctx, RedisModuleString **argv,
 /** Cleans up all globals in the module */
 void RediSearch_CleanupModule(void);
 
+/** Module-level dummy context for certain dummy RM_XXX operations */
+extern RedisModuleCtx *RSDummyContext;
+
 #ifdef __cplusplus
 }
 #endif
