@@ -79,7 +79,9 @@ void Document_Detach(Document *doc, RedisModuleCtx *srcCtx) {
 }
 
 void Document_Free(Document *doc) {
-  free(doc->fields);
+  if (doc->fields) {
+    free(doc->fields);
+  }
 }
 
 void Document_FreeDetached(Document *doc, RedisModuleCtx *anyCtx) {
