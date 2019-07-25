@@ -1076,7 +1076,7 @@ int RediSearch_InitModuleInternal(RedisModuleCtx *ctx, RedisModuleString **argv,
 
 void __attribute__((destructor)) RediSearch_CleanupModule(void) {
   static int invoked = 0;
-  if (invoked) {
+  if (invoked || !RS_Initialized) {
     return;
   }
   invoked = 1;

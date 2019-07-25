@@ -114,6 +114,7 @@ static int initAsLibrary(RedisModuleCtx *ctx) {
 }
 
 RedisModuleCtx *RSDummyContext = NULL;
+int RS_Initialized = 0;
 
 int RediSearch_Init(RedisModuleCtx *ctx, int mode) {
 #define DO_LOG(...)                               \
@@ -124,6 +125,7 @@ int RediSearch_Init(RedisModuleCtx *ctx, int mode) {
   // Print version string!
   DO_LOG("notice", "RediSearch version %d.%d.%d (Git=%s)", REDISEARCH_VERSION_MAJOR,
          REDISEARCH_VERSION_MINOR, REDISEARCH_VERSION_PATCH, RS_GetExtraVersion());
+  RS_Initialized = 1;
 
   RSDummyContext = RedisModule_GetThreadSafeContext(NULL);
 
