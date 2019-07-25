@@ -144,7 +144,7 @@ RSDoc* RediSearch_CreateDocument(const void* docKey, size_t len, double score, c
   const char* language = lang ? lang : "english";
   Document* ret = rm_calloc(1, sizeof(*ret));
   Document_Init(ret, docKeyStr, score, language);
-  ret->language = strdup(ret->language);
+  Document_MakeRefOwner(ret);
   return ret;
 }
 
@@ -172,9 +172,9 @@ int RediSearch_DeleteDocument(IndexSpec* sp, const void* docKey, size_t len) {
 }
 
 void RediSearch_DocumentAddField(Document* d, const char* fieldName, RedisModuleString* value,
-                                 unsigned as) {
+                                 RedisModuleCtx* ctx, unsigned as) {
   Document_AddField(d, fieldName, value, as);
-  RedisModule_RetainString(NULL, value);
+  RedisModule_RetainString(ctx, value);
 }
 
 void RediSearch_DocumentAddFieldString(Document* d, const char* fieldname, const char* s, size_t n,
